@@ -1,6 +1,6 @@
 package ru.netology.web.test;
 
-import com.codeborne.selenide.SelenideElement;
+
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,8 @@ class MoneyTransferTest {
         val authInfo = DataHelper.getAuthInfo();
         val verificationPage = loginPage.validLogin(authInfo);
         val verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
         dashboardPage = verificationPage.validVerify(verificationCode);
+        dashboardPage.startSUT();
     }
 
     @Test
@@ -43,9 +43,9 @@ class MoneyTransferTest {
 
     @Test
     void shouldTransferZeroAmountOnSecondCard() {
-        val dataCardSecond = DataHelper.getFirstCard();
+        val dataCardFirst = DataHelper.getFirstCard();
         val transferPage = dashboardPage.selectCard(numberSecondCard);
-        transferPage.transferMoneyFromCardToAnotherCard(dataCardSecond,0);
+        transferPage.transferMoneyFromCardToAnotherCard(dataCardFirst,0);
         $(withText("Ваши карты")).shouldBe(visible);
         int balanceAfterTransferFirstCard=dashboardPage.getBalanceCard(numberFirstCard);
         int balanceAfterTransferSecondCard=dashboardPage.getBalanceCard(numberSecondCard);
@@ -67,14 +67,14 @@ class MoneyTransferTest {
 
     @Test
     void shouldTransferMiddleAmountOnSecondCard() {
-        val dataCardSecond = DataHelper.getFirstCard();
+        val dataCardFirst = DataHelper.getFirstCard();
         val transferPage = dashboardPage.selectCard(numberSecondCard);
-        transferPage.transferMoneyFromCardToAnotherCard(dataCardSecond,5000);
+        transferPage.transferMoneyFromCardToAnotherCard(dataCardFirst,5000);
         $(withText("Ваши карты")).shouldBe(visible);
         int balanceAfterTransferFirstCard=dashboardPage.getBalanceCard(numberFirstCard);
         int balanceAfterTransferSecondCard=dashboardPage.getBalanceCard(numberSecondCard);
-        assertEquals(10000,balanceAfterTransferFirstCard);
-        assertEquals(10000,balanceAfterTransferSecondCard);
+        assertEquals(5000,balanceAfterTransferFirstCard);
+        assertEquals(15000,balanceAfterTransferSecondCard);
     }
 
     @Test
@@ -91,14 +91,30 @@ class MoneyTransferTest {
 
     @Test
     void shouldTransferMaximumAmountOnSecondCard() {
-        val dataCardSecond = DataHelper.getFirstCard();
+        val dataCardFirst = DataHelper.getFirstCard();
         val transferPage = dashboardPage.selectCard(numberSecondCard);
-        transferPage.transferMoneyFromCardToAnotherCard(dataCardSecond,20000);
+        transferPage.transferMoneyFromCardToAnotherCard(dataCardFirst,10000);
         $(withText("Ваши карты")).shouldBe(visible);
         int balanceAfterTransferFirstCard=dashboardPage.getBalanceCard(numberFirstCard);
         int balanceAfterTransferSecondCard=dashboardPage.getBalanceCard(numberSecondCard);
         assertEquals(0,balanceAfterTransferFirstCard);
         assertEquals(20000,balanceAfterTransferSecondCard);
+    }
+
+    @Test
+    void shouldTransferMoreThanMaximumAmountOnFirstCard() {
+        val dataCardSecond = DataHelper.getSecondCard();
+        val transferPage = dashboardPage.selectCard(numberFirstCard);
+        transferPage.transferMoneyFromCardToAnotherCard(dataCardSecond,20000);
+        $(withText("Недостаточно средств для перевода!")).shouldBe(visible);
+    }
+
+    @Test
+    void shouldTransferMoreThanMaximumAmountOnSecondCard() {
+        val dataCardFirst = DataHelper.getFirstCard();
+        val transferPage = dashboardPage.selectCard(numberSecondCard);
+        transferPage.transferMoneyFromCardToAnotherCard(dataCardFirst,20000);
+        $(withText("Недостаточно средств для перевода!")).shouldBe(visible);
     }
 
 

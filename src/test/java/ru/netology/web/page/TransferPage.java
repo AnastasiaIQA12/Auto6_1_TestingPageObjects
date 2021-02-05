@@ -1,6 +1,7 @@
 package ru.netology.web.page;
 
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.Keys;
 import ru.netology.web.data.DataHelper;
 
 import static com.codeborne.selenide.Condition.visible;
@@ -17,7 +18,10 @@ public class TransferPage {
     }
 
     public void transferMoneyFromCardToAnotherCard(DataHelper.Card card, int transferAmount) {
+        String str=String.valueOf(transferAmount);
+        amount.sendKeys(Keys.CONTROL+"A"+Keys.DELETE);
         amount.setValue(String.valueOf(transferAmount));
+        numberCard.sendKeys(Keys.CONTROL+"A"+Keys.DELETE);
         numberCard.setValue(card.getNumber());
         transferButton.click();
     }
